@@ -6,14 +6,21 @@ import br.dev.jcp.learning.jcpspringboot6sfg.domain.Publisher;
 import br.dev.jcp.learning.jcpspringboot6sfg.repositories.AuthorRepository;
 import br.dev.jcp.learning.jcpspringboot6sfg.repositories.BookRepository;
 import br.dev.jcp.learning.jcpspringboot6sfg.repositories.PublisherRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 @Component
+@Slf4j
 public class BootstrapData implements CommandLineRunner {
 
+    private static Logger logger = LoggerFactory.getLogger(BootstrapData.class);
+    
     private final AuthorRepository authorRepository;
     private final BookRepository bookRepository;
     private final PublisherRepository publisherRepository;
@@ -34,11 +41,6 @@ public class BootstrapData implements CommandLineRunner {
         ddd.setTitle("Domain Driven Design");
         ddd.setIsbn("123456");
 
-/*
-        eric.getBooks().add(ddd);
-        ddd.getAuthors().add(eric);
-*/
-
         Author ericSaved = authorRepository.save(eric);
         Book dddSaved = bookRepository.save(ddd);
 
@@ -50,16 +52,14 @@ public class BootstrapData implements CommandLineRunner {
         noEJB.setTitle("J2EE Development without EJB");
         noEJB.setIsbn("54757585");
 
-/*
-        rod.getBooks().add(noEJB);
-        noEJB.getAuthors().add(rod);
-*/
-
         Author rodSaved = authorRepository.save(rod);
         Book noEJBSaved = bookRepository.save(noEJB);
 
-        ericSaved.getBooks().add(dddSaved);
-        rodSaved.getBooks().add(noEJBSaved);
+        dddSaved.setAuthors(Set.of(ericSaved));
+        noEJBSaved.setAuthors(Set.of(rodSaved));
+
+        ericSaved.setBooks(Set.of(dddSaved));
+        rod.setBooks(Set.of(noEJBSaved));
 
         authorRepository.save(ericSaved);
         authorRepository.save(rodSaved);
@@ -75,15 +75,15 @@ public class BootstrapData implements CommandLineRunner {
         bookRepository.save(dddSaved);
         bookRepository.save(noEJBSaved);
 
-        System.out.println("In Bootstrap");
-        System.out.println("Author Count: " + authorRepository.count());
-        System.out.println("Book Count: " + bookRepository.count());
-        System.out.println("Publisher Count: " + publisherRepository.count());
+        
+        logger.info("In Bootstrap");
+        logger.info("Author Count: {}", authorRepository.count());
+        logger.info("Book Count: {}", bookRepository.count());
+        logger.info("Publisher Count: {}", publisherRepository.count());
 
-        //List<Author> authors = (List<Author>) authorRepository.findAll();
-        List<Author> authors = (List<Author>) authorRepository.listAllAuthors();
+        List<Author> authors = authorRepository.listAllAuthors();
         for (Author author : authors) {
-            System.out.println("Author: " + author);
+            logger.info("Author: {}",  author);
         }
     }
 
